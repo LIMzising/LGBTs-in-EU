@@ -1,0 +1,567 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta charset='utf-8' />
+    <title>LGBTs in European Union</title>
+
+    <style>
+        body {
+            background-color: #dee2ff;
+        }
+
+        .side-bar {
+            display: inline-block;
+            vertical-align: top;
+            box-sizing: border-box;
+            width: 440px;
+            height: 640px;
+            padding: 30px 30px 40px 30px;
+            text-align: left;
+            font-size: large;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+        
+        #tooltip-container {
+            position: absolute;
+            background-color: #feeafa;
+            padding: 0px 15px 0px 15px;
+            display: none;
+            border: 3px solid #5e548e;
+            border-radius: 5px;
+        }
+
+        #tooltip-text {
+            font-family: cursive;
+            font-size: 15px;
+        }
+
+        .frame {
+            border: 10px double black;
+            padding: 15px;
+            background: white;
+            background-clip: padding-box;
+            margin-left: 10px;
+        }
+
+        .headerframe {
+            border: 10px double black;
+            padding: 15px;
+            background: #390099;
+            background-clip: padding-box;
+            margin-left: 10px;
+        }
+
+        .standard {
+            width: 1400px;
+        }
+
+        .plot {
+            width: 900px;
+        }
+
+        .textbox {
+            width: 440px;
+        }
+
+        .title {
+            text-align: center;
+            font-family: cursive;
+            font-size: 20px;
+        }
+
+        .header {
+            text-align: center;
+            font-family: cursive;
+            font-size: 40px;
+            color: white;
+        }
+
+        .row {
+            display: flex;
+        }
+
+        .legend {
+            padding: 1px 5px 2px 5px;
+        }
+
+    </style>
+
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <!-- load plugins for bubble map --> 
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+    <!-- load plotly.js for 3d scatter plot -->
+    <script src='https://cdn.plot.ly/plotly-2.16.1.min.js'></script>
+
+</head>
+
+<body>
+
+    <div class="headerframe standard">
+        <p class="header">LGBTs in European Union</p>
+    </div>
+    <br>
+
+    <div class="frame standard">
+        <p class="title">Sexual Orientation Law</p>
+        <br>
+
+        <!-- add 5 buttons -->
+        <p><i>Hint: Click the buttons below to see percentages in different subgroups</i></p>
+        <button onclick="update('Overall')">Overall</button>
+        <button onclick="update('Lesbian')">Lesbian</button>
+        <button onclick="update('Gay')">Gay</button>
+        <button onclick="update('Bisexual')">Bisexual</button>
+        <button onclick="update('Transgender')">Transgender</button>
+        <br>
+        <br>
+
+        <svg id="lollipop" width="1500" height="350"></svg>
+    </div>
+    <br>
+
+    <div class="row">
+        <div class="frame textbox">
+            <div style="text-align: left; background-color: white;" class="side-bar">
+        
+                <p style="font-size: medium;">LGBT (lesbian, gay, bisexual, and transgender) issues have received more public attention in recent years. In general, society is growing more inclusive or friendly to LGBT individuals, however, the degree of openness is varying among regions, nations, and even cities. Therefore, this project aims to explore and visualize the aspects that will affect the living satisfaction across different countries in European Union as a LGBT individual. </p>
+                <br>
+
+                <h4><i>Color Palette for Country Region</i></h4>
+
+                <div class="legend" style="background-color: red ; ">
+                    <p class="title" style="color: whitesmoke ; font-size: 15px;">Northern Europe</p>
+                </div>
+                <br>
+
+                <div class="legend" style="background-color: blue ; ">
+                    <p class="title" style="color: whitesmoke ; font-size: 15px;">Southern Europe</p>
+                </div>
+                <br>
+
+                <div class="legend" style="background-color: darkorange ;">
+                    <p class="title" style="color: whitesmoke ; font-size: 15px;">Eastern Europe</p>
+                </div>
+                <br>
+
+                <div class="legend" style="background-color: green ;">
+                    <p class="title" style="color: whitesmoke ; font-size: 15px;">Western Europe</p>
+                </div>
+
+            </div>
+      
+        </div>
+
+        <div class="frame plot">
+            <p class="title">Population</p>
+            <br>
+            <p>Hint: Hover your mouse over the bubbles to see details</p>
+    
+            <svg id="map" width="900" height="500"></svg>
+        </div>
+    </div>
+    <br>
+
+    <div class="row">
+        <div class="frame plot">
+            <div id='3d' ></div>
+        </div>
+
+        <div class="frame textbox">
+            <div style="text-align: left; background-color: #dee2ff;" class="side-bar">
+        
+                <p class="title">Acknowledgements</p>
+                <br>
+                <p style="font-size: medium;"><i> Data sources: </p>
+                <p style="font-size: medium;">1. <a href="https://www.kaggle.com/datasets/ruslankl/european-union-lgbt-survey-2012 ">European Union lesbian, gay, bisexual, and transgender survey (2012)</a></p>
+                <p style="font-size: medium;">2. <a href="https://www.kaggle.com/datasets/cityapiio/countries-population-2010-2020-data ">Countries population. 2010 - 2020 data. ISO codes </a></p>
+                <p style="font-size: medium;">3. <a href="https://www.kaggle.com/datasets/madhurpant/europe-population-data ">Europe Country Data </a></p>
+                <p style="font-size: medium;">4. <a href="https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson">World GeoJson Data </a></p>
+                <br>
+                <p style="font-size: medium;"><i> Code sources: </p>
+                <p style="font-size: medium;">1. <a href="https://d3-graph-gallery.com/graph/bubblemap_circleFeatures.html ">Bubble map with color and size mapped to data </a></p>
+                <p style="font-size: medium;">2. <a href="https://d3-graph-gallery.com/graph/bubblemap_template.html ">Bubblemap template</a></p>
+                <p style="font-size: medium;">3. <a href="https://d3-graph-gallery.com/graph/lollipop_button_data_csv.html">Lollipop with selected input data </a></p>
+                <p style="font-size: medium;">4. <a href="https://plotly.com/javascript/3d-point-clustering/ ">3d clsuter scatter plot</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="tooltip-container">
+        <p id="tooltip-text"></p>
+    </div>
+
+    <script type="text/javascript">
+
+        // references for bubble map
+        // adapted from original code courtesy of Yan Holtz [3][4]
+        
+        // data sources
+        var mapDataPath = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
+        var locationDataPath = "./data/bubblemap.csv";
+        var lawDataPath = "./data/lollipop.csv";
+        var relationDataPath = "./data/scatterplot.csv";
+        
+        
+        // svg for bubble map
+        var svgMap = d3.select("#map"),
+            width = svgMap.attr("width"),
+            height = svgMap.attr("height");
+        
+        // project map
+        var projection = d3.geoMercator()
+            .center([20, 54])                
+            .scale(420)                       
+            .translate([ width/2, height/2 ])
+        
+        var mapVar = svgMap.append("g");
+        
+        // add the countries boundary polygons
+        d3.json(mapDataPath, function(data){
+
+            mapVar
+                .selectAll("path")
+                .data(data.features)
+                .enter()
+                .append("path")
+                .attr("fill", "#b8b8b8")
+                .attr("d", d3.geoPath()
+                    .projection(projection)
+                )
+                .style("stroke", "black")
+                .style("opacity", .3)
+        })
+
+         // add bubbles on map
+         d3.csv(locationDataPath, function(data) {
+        
+            // add bubble size
+            var sizeExtent = d3.extent(data, function(d) { 
+                return d.N; 
+            })
+        
+            var size = d3.scaleSqrt()
+                .domain(sizeExtent)  
+                .range([5, 33])  
+        
+        
+            // add mouse hover 
+            var mouseover = function(d) {
+                var circleSelected = d3.select(this);
+                circleSelected.raise().style("fill-opacity", .8)
+            }
+            
+            var mousemove = function(d) {
+                    d3.select("#tooltip-container")
+                        .style("display", "block")
+                        .style("left", (d3.mouse(this)[0] + 300) + "px")
+                        .style("top", (d3.mouse(this)[1] + 775) + "px");
+                    d3.select("#tooltip-text").html(function() {
+                        return(
+                            "<b>Country Code: </b>" + d.CountryID + "<br>" + 
+                            "<b>Country Name: </b>" + d.CountryName + "<br>" + 
+                            "<b>Region: </b>" + d.Region + "<br>" + 
+                            "<br>" + 
+                            "<b><i><u>Percentage: </u></i></b>" + "<br>" + 
+                            "<b>Lesbian: </b>" + Number(d.Lesbian).toFixed(3) + "%<br>" + 
+                            "<b>Gay: </b>" + Number(d.Gay).toFixed(3) + "%<br>" + 
+                            "<b>Bisexual: </b>" + Number(d.Bisexual).toFixed(3) + "%<br>" + 
+                            "<b>Transgender: </b>" + Number(d.Transgender).toFixed(3) + "%<br>" + 
+                            "<b>Total: </b>" + Number(d.N).toFixed(3) + "%"
+                        )
+                    })
+                }
+        
+                var mouseleave = function(d) {
+                    d3.select("#tooltip-container")
+                        .style("display", "none")
+                    d3.select(this)
+                        .style("fill-opacity", .4)
+                }
+        
+        
+            // draw bubbles
+            svgMap.selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr('id', function(d){
+                    return d.CountryID
+                })
+                .attr("cx", function(d) {
+                    return projection([d.Longitude, d.Latitude])[0]
+                })
+                .attr("cy", function(d) {
+                    return projection([d.Longitude, d.Latitude])[1] 
+                })
+                .attr("r", function(d) {
+                    return size(d.N)
+                })
+                .style("stroke",  "black")
+                .style("stroke-width", 2)
+                .style("fill", function(d) {
+                    if(d.Region == "Eastern Europe") {
+                        return "darkorange"
+                    }
+                    if(d.Region == "Northern Europe") {
+                        return "red"
+                    }
+                    if(d.Region == "Southern Europe") {
+                        return "blue"
+                    }
+                    if(d.Region == "Western Europe") {
+                        return "green"
+                    }
+                    return "black"
+                })
+                .style("fill-opacity", .4)
+                .on("mouseover", mouseover)
+                .on("mousemove", mousemove)
+                .on("mouseleave", mouseleave)
+                
+        
+            // add legend for bubble sizes
+            var valuesToShow = [0.02,0.05,0.08]
+            var xCircle = 60
+            var xLabel = 110
+        
+            // add circles
+            svgMap
+                .selectAll("legend")
+                .data(valuesToShow)
+                .enter()
+                .append("circle")
+                .attr("cx", xCircle)
+                .attr("cy", function(d){ return height - size(d) } )
+                .attr("r", function(d){ return size(d) })
+                .style("fill", "none")
+                .attr("stroke", "black")
+        
+            // add lines
+            svgMap
+                .selectAll("legend")
+                .data(valuesToShow)
+                .enter()
+                .append("line")
+                .attr('x1', function(d){ return xCircle + size(d) } )
+                .attr('x2', xLabel)
+                .attr('y1', function(d){ return height - size(d) } )
+                .attr('y2', function(d){ return height - size(d) } )
+                .attr('stroke', 'black')
+                .style('stroke-dasharray', ('2,2'))
+        
+            // add labels
+            svgMap
+                .selectAll("legend")
+                .data(valuesToShow)
+                .enter()
+                .append("text")
+                .attr('x', xLabel)
+                .attr('y', function(d){ return height - size(d) } )
+                .text( function(d){ return d } )
+                .style("font-size", 10)
+                .attr('alignment-baseline', 'middle')
+        
+        })
+        
+        
+        
+        // references for lollipop
+        // adapted from original code courtesy of Yan Holtz [5]
+        
+        // svg for lollipop
+        var svg = d3.select("#lollipop")
+        .append("svg")
+            .attr("width", 1500)
+            .attr("height", 350)
+        .append("g")
+            .attr("transform","translate(" + 100 + "," + 50 + ")");
+        
+        // add x axis
+        var xAxis = svg.append("g")
+            .attr("transform", "translate(0," + 200 + ")")
+        
+        // add y axis
+        var yAxis = svg.append("g")
+        
+        
+        // update lollipop for selected variables
+        function update(selectedVar) {
+        
+            // draw lollipop
+            d3.csv(lawDataPath, function(data) {
+        
+                // x axis values
+                var x = d3.scaleBand()
+                .range([0, 1200])
+                .padding(1)
+                .domain(data.map(function(d) { return d.CountryName; }))
+                
+                xAxis.call(d3.axisBottom(x))
+                .selectAll("text")
+                .attr("transform", "rotate(-45)")
+                .style("text-anchor", "end");
+        
+                xAxis.transition().duration(2000).call(d3.axisBottom(x))
+        
+                // add x axis label
+                svg.append("text")
+                    .style("text-anchor", "end")
+                    .attr("x", 1260)
+                    .attr("y", 225)
+                    .text("Country Name");
+        
+                // y axis values
+                var y = d3.scaleLinear()
+                .range([200, 0])
+                .domain([0, d3.max(data, function(d) { return +d[selectedVar] }) ]);
+        
+                yAxis.transition().duration(2000).call(d3.axisLeft(y));
+        
+                // y axis label
+                svg.append("text")
+                    .style("text-anchor", "end")
+                    .attr("x", 80)
+                    .attr("y", -15)
+                    .text("Law Existence Percentage")
+        
+        
+                // add lollipop lines
+                var line = svg.selectAll(".lines")
+                .data(data)
+        
+                line
+                .enter()
+                .append("line")
+                .attr("class", "lines")
+                .merge(line)
+                .transition()
+                .duration(500)
+                    .attr("x1", function(d) { console.log(x(d.CountryName)) ; return x(d.CountryName); })
+                    .attr("x2", function(d) { return x(d.CountryName); })
+                    .attr("y1", y(0))
+                    .attr("y2", function(d) { return y(d[selectedVar]); })
+                    .style("stroke", function(d) {
+                    if(d.Region == "Eastern Europe") {
+                        return "darkorange"
+                    }
+                    if(d.Region == "Northern Europe") {
+                        return "red"
+                    }
+                    if(d.Region == "Southern Europe") {
+                        return "blue"
+                    }
+                    if(d.Region == "Western Europe") {
+                        return "green"
+                    }
+                    return "black"
+                })
+        
+        
+                // add lollipop circles
+                var circle = svg.selectAll("circle")
+                .data(data)
+        
+                circle
+                .enter()
+                .append("circle")
+                .merge(circle)
+                .transition()
+                .duration(500)
+                    .attr("cx", function(d) { return x(d.CountryName); })
+                    .attr("cy", function(d) { return y(d[selectedVar]); })
+                    .attr("r", 10)
+                    .style("fill", function(d) {
+                    if(d.Region == "Eastern Europe") {
+                        return "darkorange"
+                    }
+                    if(d.Region == "Northern Europe") {
+                        return "red"
+                    }
+                    if(d.Region == "Southern Europe") {
+                        return "blue"
+                    }
+                    if(d.Region == "Western Europe") {
+                        return "green"
+                    }
+                    return "black"
+                })
+            })
+        }
+        
+        // initialize lollipop graph
+        update('Overall')
+        
+        
+        
+        // references for lollipop
+        // adapted from original code courtesy of Mojtaba Samimi [6]
+        
+        // draw 3d scatter plot
+        d3.csv(relationDataPath, function(error, rows){
+        
+            function unpack(rows, key) {
+                return rows.map(function(row) { 
+                    return row[key]; 
+                });
+            }
+            
+            // set x, y and z axes for lollipop
+            var data = [{
+                x: unpack(rows, 'LawPercentage'),
+                y: unpack(rows, 'DiscriminationPercentage'),
+                z: unpack(rows, 'PopulationPercentage'),
+        
+                // draw scatter dots
+                mode: 'markers',
+                type: 'scatter3d',
+                marker: {
+                    color: '#390099',
+                    size: 4
+                },
+                hovertemplate:
+                    "Law Percentage (%): %{x:.0f}<br>" +
+                    "Discrimination Percentage (%): %{y:.0f}<br>" +
+                    "Population Percentage (%): %{z:.5f}<br>"
+            },{
+                // draw clusters
+                alphahull: 5,
+                opacity: 0.2,
+                type: 'mesh3d',
+                x: unpack(rows, 'LawPercentage'),
+                y: unpack(rows, 'DiscriminationPercentage'),
+                z: unpack(rows, 'PopulationPercentage'),
+                hovertemplate:
+                    "Law Percentage (%): %{x:.0f}<br>" +
+                    "Discrimination Percentage (%): %{y:.0f}<br>" +
+                    "Population Percentage (%): %{z:.5f}<br>"
+            }];
+            
+            // add titles and axes labels
+            var layout = {
+                width: 900,
+                height: 600,
+                title: {
+                    text: 'Sexual Orientation Law VS Discrimination VS Population', 
+                    font: {
+                    family: "cursive",
+                    size: 20
+                }},
+                scene: {
+                    xaxis:{title: 'Law Percentage (%)'},
+                    yaxis:{title: 'Discrimination Percentage (%)'},
+                    zaxis:{title: 'Population Percentage (%)'}
+                    }
+            };
+            
+            // plot 3d graph using plotly
+            Plotly.newPlot('3d', data, layout);
+        });
+        // })
+        
+    
+    </script>
+
+</body>
